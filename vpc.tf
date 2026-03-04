@@ -8,7 +8,7 @@ resource "aws_vpc" "my-vpc" {
 }
 
 resource "aws_subnet" "mysubnet-1" {
-  vpc_id = "vpc-0bba4a05381dfa9f9"
+  vpc_id = aws_vpc.my-vpc.id
   cidr_block = "192.78.0.0/20"
   map_public_ip_on_launch = true
   availability_zone = "ap-south-1a"
@@ -18,7 +18,7 @@ resource "aws_subnet" "mysubnet-1" {
 }
 
 resource "aws_subnet" "mysubnet-2" {
-  vpc_id = "vpc-0bba4a05381dfa9f9"
+  vpc_id = aws_vpc.my-vpc.id
   cidr_block = "192.78.16.0/20"
   availability_zone = "ap-south-1b"
   tags = {
@@ -27,7 +27,7 @@ resource "aws_subnet" "mysubnet-2" {
 }
 
 resource "aws_internet_gateway" "igw" {
-  vpc_id = "vpc-0bba4a05381dfa9f9"
+  vpc_id = aws_vpc.my-vpc.id
 
   tags = {
     Name = "my-igw"
@@ -35,10 +35,10 @@ resource "aws_internet_gateway" "igw" {
 }
 
 resource "aws_default_route_table" "default-tb" {
-  default_route_table_id = "rtb-010c1c7fac94d3095"
+  default_route_table_id = aws_vpc.my-vpc.default_route_table_id
 
   route {
     cidr_block = "0.0.0.0/0"
-    gateway_id = "igw-06369d3a3122d8bde"
+    gateway_id = aws_internet_gateway.igw.id
   }
 }
