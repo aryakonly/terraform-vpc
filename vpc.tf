@@ -42,3 +42,8 @@ resource "aws_default_route_table" "default-tb" {
     gateway_id = aws_internet_gateway.igw.id
   }
 }
+
+resource "aws_route_table_association" "public-assoc" {
+  subnet_id = aws_subnet.mysubnet-1.id
+  route_table_id = aws_default_route_table.default-tb.id
+}
