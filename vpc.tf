@@ -8,7 +8,7 @@ resource "aws_vpc" "my-vpc" {
 }
 
 resource "aws_subnet" "mysubnet-1" {
-  vpc_id     = aws_vpc.main.id
+  vpc_id = "vpc-0bba4a05381dfa9f9"
   cidr_block = "192.78.0.0/20"
   map_public_ip_on_launch = true
   tags = {
