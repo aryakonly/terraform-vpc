@@ -25,3 +25,11 @@ resource "aws_subnet" "mysubnet-2" {
     Name = "private-sunbet"
   }
 }
+
+resource "aws_internet_gateway" "igw" {
+  vpc_id = "vpc-0bba4a05381dfa9f9"
+
+  tags = {
+    Name = "my-igw"
+  }
+}
