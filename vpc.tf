@@ -1,28 +1,31 @@
 provider "aws" {
-    region = "ap-south-1"
+    region = var.region
   
 }
 
 resource "aws_vpc" "my-vpc" {
-  cidr_block = "192.78.0.0/16"
+  cidr_block = var.mumbai_vpc_cidr
+  tags = {
+    Name= var.vpc_name
+  }
 }
 
 resource "aws_subnet" "mysubnet-1" {
   vpc_id = aws_vpc.my-vpc.id
-  cidr_block = "192.78.0.0/20"
+  cidr_block = var.public_cidr_block
   map_public_ip_on_launch = true
-  availability_zone = "ap-south-1a"
+  availability_zone = var.public_available_zone
   tags = {
-    Name = "public-sunbet"
+    Name = var.public_subnet_name
   }
 }
 
 resource "aws_subnet" "mysubnet-2" {
   vpc_id = aws_vpc.my-vpc.id
-  cidr_block = "192.78.16.0/20"
-  availability_zone = "ap-south-1b"
+  cidr_block = var.private_cidr_block
+  availability_zone = var.private_available_zone
   tags = {
-    Name = "private-sunbet"
+    Name = var.private_subnet_name
   }
 }
 
@@ -30,7 +33,7 @@ resource "aws_internet_gateway" "igw" {
   vpc_id = aws_vpc.my-vpc.id
 
   tags = {
-    Name = "my-igw"
+    Name = var.igw_name
   }
 }
 
@@ -57,7 +60,7 @@ resource "aws_nat_gateway" "my-ngw" {
   subnet_id     = aws_subnet.mysubnet-1.id
 
   tags = {
-    Name = "my-ngw"
+    Name = var.nat_name
   }
 }
 
@@ -69,7 +72,7 @@ resource "aws_route_table" "NAT-tb" {
   }
 
   tags = {
-    Name = "NAT-tb"
+    Name = var.nat_route_table_name
   }
 }
 
@@ -79,24 +82,54 @@ resource "aws_route_table_association" "private-assoc" {
   
 }
 
+resource "aws_security_group" "my-sg-1" {
+  name        = var.security_group_name
+  description = var.description_sg
+  vpc_id = aws_vpc.my-vpc.id
+  ingress {
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+  ingress {
+    from_port   = 80
+    to_port     = 80
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+  ingress {
+    from_port   = 443
+    to_port     = 443
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+}
+
 resource "aws_instance" "Ec2Instance" {
-    ami           = "ami-051a31ab2f4d498f5"
-    instance_type = "t3.micro"
-    key_name = "mumbai-key"
-    vpc_security_group_ids = ["sg-0098f50bfc62f633d"]
+    ami           = var.image_instance
+    instance_type = var.instance_type
+    key_name = var.instance_key
+    vpc_security_group_ids = [aws_security_group.my-sg-1.id]
     subnet_id = aws_subnet.mysubnet-1.id
     tags = {
-      Name = "Ec2Instance"
+      Name = var.public_instance_name
     }
 }
 
 resource "aws_instance" "Ec2Instance-private" {
-    ami           = "ami-051a31ab2f4d498f5"
-    instance_type = "t3.micro"
-    key_name = "mumbai-key"
-    vpc_security_group_ids = ["sg-0098f50bfc62f633d"]
+    ami           = var.image_instance
+    instance_type = var.instance_type
+    key_name = var.instance_key
+    vpc_security_group_ids = [aws_security_group.my-sg-1.id]
     subnet_id = aws_subnet.mysubnet-2.id
     tags = {
-      Name = "Ec2Instance-private"
+      Name = var.private_instance_name
     }
 }
