@@ -126,12 +126,11 @@ resource "aws_instance" "Ec2Instance" {
     subnet_id = aws_subnet.mysubnet-1.id
     user_data = <<-EOF
     #!/bin/bash
-    curl -O https://dlcdn.apache.org/tomcat/tomcat-9/v9.0.115/bin/apache-tomcat-9.0.115.tar.gz
-    tar -xzvf apache-tomcat-9.0.113.tar.gz -C /opt
-    cd /opt/apache-tomcat-9.0.113/bin/
     yum install java -y
-    ./catalina.sh start 
-    cd /opt/apache-tomcat-9.0.113/webapps/
+    curl -O https://dlcdn.apache.org/tomcat/tomcat-9/v9.0.115/bin/apache-tomcat-9.0.115.tar.gz
+    tar -xzvf apache-tomcat-9.0.115.tar.gz -C /opt
+    /opt/apache-tomcat-9.0.115/bin/./catalina.sh start
+    cd /opt/apache-tomcat-9.0.115/webapps/
     curl -O https://s3-us-west-2.amazonaws.com/studentapi-cit/student.war
     EOF
     tags = {
