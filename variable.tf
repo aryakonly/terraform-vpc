@@ -5,7 +5,7 @@ variable "region" {
 variable "mumbai_vpc_cidr" {
   description = "CIDR of Vpc"
   type = string
-  default = "192.78.0.0/16"
+  default = "192.34.0.0/16"
 }
 
 variable "vpc_name" {
@@ -17,7 +17,7 @@ variable "vpc_name" {
 variable "public_cidr_block" {
     description = "Public Subnet CIDR block"
     type = string
-    default = "192.78.0.0/20"
+    default = "192.34.0.0/20"
 }
 
 variable "public_available_zone" {
@@ -35,7 +35,7 @@ variable "public_subnet_name" {
 variable "private_cidr_block" {
     description = "Private CIDR Block"
     type = string
-    default = "192.78.16.0/20"
+    default = "192.34.16.0/20"
 }
 
 variable "private_available_zone" {
