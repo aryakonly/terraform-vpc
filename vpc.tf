@@ -150,7 +150,7 @@ resource "aws_db_instance" "my_db" {
   password = "Aryakadam47"
 
   db_subnet_group_name   = aws_db_subnet_group.my_db_subnet.name
-  vpc_security_group_ids = ["aws_security_group.my-sg-1.id"]
+  vpc_security_group_ids = [aws_security_group.my-sg-1.id]
 
   publicly_accessible = true
   skip_final_snapshot = true
