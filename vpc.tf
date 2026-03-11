@@ -173,8 +173,16 @@ resource "aws_instance" "Ec2Instance" {
     curl -O https://s3-us-west-2.amazonaws.com/studentapi-cit/student.war
     cd /opt/apache-tomcat-9.0.115/lib/
     curl -O https://s3-us-west-2.amazonaws.com/studentapi-cit/mysql-connector.jar
-    FILE="/opt/tomcat-9.0.115/conf/context.xml"
-    sed -i '$i <Resource name="jdbc/TestDB" auth="Container" type="javax.sql.DataSource" maxTotal="500" maxIdle="30" maxWaitMillis="1000" username="arya" password="Aryakadam47" driverClassName="com.mysql.jdbc.Driver" url="jdbc:mysql://${aws_db_instance.my_db.endpoint}/studentapp?useUnicode=yes&characterEncoding=utf8"/>' $FILE
+    python3 -c "
+    f = open('/opt/apache-tomcat-9.0.115/conf/context.xml', 'r')
+    lines = f.readlines()
+    f.close()
+    resource = '    <Resource name=\"jdbc/TestDB\" auth=\"Container\" type=\"javax.sql.DataSource\" maxTotal=\"500\" maxIdle=\"30\" maxWaitMillis=\"1000\" username=\"arya\" password=\"Aryakadam47\" driverClassName=\"com.mysql.jdbc.Driver\" url=\"jdbc:mysql://${aws_db_instance.my_db.address}:3306/studentapp?useUnicode=yes&amp;characterEncoding=utf8\"/>\n'
+    lines.insert(-1, resource)
+    f = open('/opt/apache-tomcat-9.0.115/conf/context.xml', 'w')
+    f.writelines(lines)
+    f.close()
+    "
     /opt/apache-tomcat-9.0.115/bin/./catalina.sh stop
     /opt/apache-tomcat-9.0.115/bin/./catalina.sh start
     EOF
@@ -194,19 +202,20 @@ resource "aws_instance" "db-instance" {
     yum install mariadb105* -y
     systemctl start mariadb.service
     systemctl enable mariadb.service
-    mysql -h ${aws_db_instance.my_db.endpoint} -u arya -pAryakadam47 << 'MYSQL'
+
+    mysql -h ${aws_db_instance.my_db.address} -u arya -pAryakadam47 <<MYSQL
     create database studentapp;
     use studentapp;
     CREATE TABLE if not exists students(student_id INT NOT NULL AUTO_INCREMENT,
-	  student_name VARCHAR(100) NOT NULL,
-    student_addr VARCHAR(100) NOT NULL,
-  	student_age VARCHAR(3) NOT NULL,
-	  student_qual VARCHAR(20) NOT NULL,
-	  student_percent VARCHAR(10) NOT NULL,
-  	student_year_passed VARCHAR(10) NOT NULL,
-	  PRIMARY KEY (student_id)
+	    student_name VARCHAR(100) NOT NULL,
+      student_addr VARCHAR(100) NOT NULL,
+  	  student_age VARCHAR(3) NOT NULL,
+	    student_qual VARCHAR(20) NOT NULL,
+	    student_percent VARCHAR(10) NOT NULL,
+  	  student_year_passed VARCHAR(10) NOT NULL,
+	    PRIMARY KEY (student_id)
 	  );
-    MYSQL
+MYSQL
     EOF
     tags = {
       Name = var.private_instance_name
