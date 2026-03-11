@@ -99,9 +99,15 @@ resource "aws_security_group" "my-sg-1" {
     cidr_blocks = ["0.0.0.0/0"]
   }
   ingress {
-    from_port   = 443
-    to_port     = 443
+    from_port   = 8080
+    to_port     = 8080
     protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+  ingress {
+    from_port = 3306
+    to_port = 3306
+    protocol = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
   egress {
@@ -118,11 +124,21 @@ resource "aws_instance" "Ec2Instance" {
     key_name = var.instance_key
     vpc_security_group_ids = [aws_security_group.my-sg-1.id]
     subnet_id = aws_subnet.mysubnet-1.id
+    user_data = <<-EOF
+    #!/bin/bash
+    curl -O https://dlcdn.apache.org/tomcat/tomcat-9/v9.0.115/bin/apache-tomcat-9.0.115.tar.gz
+    tar -xzvf apache-tomcat-9.0.113.tar.gz -C /opt
+    cd /opt/apache-tomcat-9.0.113/bin/
+    yum install java -y
+    ./catalina.sh start 
+    cd /opt/apache-tomcat-9.0.113/webapps/
+    curl -O https://s3-us-west-2.amazonaws.com/studentapi-cit/student.war
+    EOF
     tags = {
       Name = var.public_instance_name
     }
 }
-
+/*
 resource "aws_instance" "Ec2Instance-private" {
     ami           = var.image_instance
     instance_type = var.instance_type
@@ -133,3 +149,4 @@ resource "aws_instance" "Ec2Instance-private" {
       Name = var.private_instance_name
     }
 }
+*/
