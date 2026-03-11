@@ -188,7 +188,7 @@ resource "aws_instance" "db-instance" {
     instance_type = var.instance_type
     key_name = var.instance_key
     vpc_security_group_ids = [aws_security_group.my-sg-1.id]
-    subnet_id = aws_subnet.mysubnet-2.id
+    subnet_id = aws_subnet.mysubnet-1.id
     user_data = <<-EOF
     #!/bin/bash
     yum install mariadb105* -y
