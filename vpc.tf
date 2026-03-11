@@ -118,6 +118,43 @@ resource "aws_security_group" "my-sg-1" {
   }
 }
 
+resource "aws_db_subnet_group" "my_db_subnet" {
+  name = "my-db-subnet-group"
+
+  subnet_ids = [
+    aws_subnet.mysubnet-1.id,
+    aws_subnet.mysubnet-2.id
+  ]
+
+  tags = {
+    Name = "db-subnet-group"
+  }
+}
+
+resource "aws_db_instance" "my_db" {
+
+  identifier = "mariadb-instance"
+
+  allocated_storage = 10
+  storage_type      = "gp2"
+
+  engine         = "mariadb"
+  engine_version = "10.6"
+
+  instance_class = "db.t3.micro"
+
+  db_name  = "mydatabase"
+  username = "arya"
+  password = "Aryakadam47"
+
+  db_subnet_group_name   = aws_db_subnet_group.my_db_subnet.name
+  vpc_security_group_ids = ["aws_security_group.my-sg-1.id"]
+
+  publicly_accessible = true
+  skip_final_snapshot = true
+
+}
+
 resource "aws_instance" "Ec2Instance" {
     ami           = var.image_instance
     instance_type = var.instance_type
@@ -132,23 +169,47 @@ resource "aws_instance" "Ec2Instance" {
     /opt/apache-tomcat-9.0.115/bin/./catalina.sh start
     cd /opt/apache-tomcat-9.0.115/webapps/
     curl -O https://s3-us-west-2.amazonaws.com/studentapi-cit/student.war
+    cd /opt/apache-tomcat-9.0.113/lib/
+    curl -O https://s3-us-west-2.amazonaws.com/studentapi-cit/mysql-connector.jar
+    FILE="/opt/tomcat/conf/context.xml"
+    sed -i '$i <Resource name="jdbc/TestDB" auth="Container" type="javax.sql.DataSource" maxTotal="500" maxIdle="30" maxWaitMillis="1000" username="arya" password="Aryakadam47" driverClassName="com.mysql.jdbc.Driver" url="jdbc:mysql://${aws_db_instance.my_db.endpoint}:3306/studentapp?useUnicode=yes&characterEncoding=utf8"/>' $FILE
+    /opt/apache-tomcat-9.0.115/bin/./catalina.sh stop
+    /opt/apache-tomcat-9.0.115/bin/./catalina.sh start
     EOF
     tags = {
       Name = var.public_instance_name
     }
 }
-/*
-resource "aws_instance" "Ec2Instance-private" {
+
+resource "aws_instance" "db-instance" {
     ami           = var.image_instance
     instance_type = var.instance_type
     key_name = var.instance_key
     vpc_security_group_ids = [aws_security_group.my-sg-1.id]
     subnet_id = aws_subnet.mysubnet-2.id
+    user_data = <<-EOF
+    #!/bin/bash
+    yum install mariadb105* -y
+    systemctl start mariadb.service
+    systemctl enable mariadb.service
+    mysql -h ${aws_db_instance.my_db.endpoint} -u arya -pAryakadam47
+    create database studentapp;
+    use studentapp;
+    CREATE TABLE if not exists students(student_id INT NOT NULL AUTO_INCREMENT,
+	  student_name VARCHAR(100) NOT NULL,
+    student_addr VARCHAR(100) NOT NULL,
+  	student_age VARCHAR(3) NOT NULL,
+	  student_qual VARCHAR(20) NOT NULL,
+	  student_percent VARCHAR(10) NOT NULL,
+  	student_year_passed VARCHAR(10) NOT NULL,
+	  PRIMARY KEY (student_id)
+	  );
+    EOF
     tags = {
       Name = var.private_instance_name
     }
 }
-*/
+
 
 output "public-ip" {
   value = aws_instance.Ec2Instance.public_ip
