@@ -26,6 +26,7 @@ resource "aws_subnet" "mysubnet-2" {
   vpc_id = aws_vpc.my-vpc.id
   cidr_block = var.private_cidr_block
   availability_zone = var.private_available_zone
+  map_public_ip_on_launch = true
   tags = {
     Name = var.private_subnet_name
   }
@@ -50,6 +51,10 @@ resource "aws_default_route_table" "default-tb" {
 
 resource "aws_route_table_association" "public-assoc" {
   subnet_id = aws_subnet.mysubnet-1.id
+  route_table_id = aws_default_route_table.default-tb.id
+}
+resource "aws_route_table_association" "private-assoc" {
+  subnet_id = aws_subnet.mysubnet-2.id
   route_table_id = aws_default_route_table.default-tb.id
 }
 
@@ -156,7 +161,7 @@ resource "aws_db_instance" "my_db" {
   skip_final_snapshot = true
 
 }
-
+/*
 resource "aws_instance" "Ec2Instance" {
     ami           = var.image_instance
     instance_type = var.instance_type
@@ -190,13 +195,13 @@ resource "aws_instance" "Ec2Instance" {
       Name = var.public_instance_name
     }
 }
-
+*/
 resource "aws_instance" "db-instance" {
     ami           = var.image_instance
     instance_type = var.instance_type
     key_name = var.instance_key
     vpc_security_group_ids = [aws_security_group.my-sg-1.id]
-    subnet_id = aws_subnet.mysubnet-1.id
+    subnet_id = aws_subnet.mysubnet-2.id
     user_data = <<-EOF
     #!/bin/bash
     yum install mariadb105* -y
@@ -223,6 +228,6 @@ MYSQL
 }
 
 
-output "public-ip" {
-  value = aws_instance.Ec2Instance.public_ip
-}
+# output "public-ip" {
+#   value = aws_instance.Ec2Instance.public_ip
+# }
