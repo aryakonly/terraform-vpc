@@ -1,6 +1,6 @@
 #!/bin/bash
 yum install update -y
-yum install mariadb-server -y
+yum install mariadb105* -y
 systemctl start mariadb.service
 systemctl enable mariadb.service
 mysql -h ${aws_db_instance.my_db.address} -u arya -pAryakadam47 <<MYSQL
