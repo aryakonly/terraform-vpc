@@ -88,7 +88,7 @@ resource "aws_route_table_association" "private-assoc" {
   route_table_id = aws_route_table.NAT-tb.id
   
 }
-*/
+
 resource "aws_security_group" "my-sg-1" {
   name        = var.security_group_name
   description = var.description_sg
@@ -124,7 +124,7 @@ resource "aws_security_group" "my-sg-1" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 }
-
+*/
 resource "aws_db_subnet_group" "my_db_subnet" {
   name = "my-db-subnet-group"
 
@@ -200,7 +200,7 @@ resource "aws_instance" "db-instance" {
     ami           = var.image_instance
     instance_type = var.instance_type
     key_name = var.instance_key
-    vpc_security_group_ids = [aws_security_group.my-sg-1.id]
+    vpc_security_group_ids = var.sg
     subnet_id = aws_subnet.mysubnet-1.id
     user_data = base64encode(file("userdata.sh"))
     tags = {
