@@ -88,7 +88,7 @@ resource "aws_route_table_association" "private-assoc" {
   route_table_id = aws_route_table.NAT-tb.id
   
 }
-
+*/
 resource "aws_security_group" "my-sg-1" {
   name        = var.security_group_name
   description = var.description_sg
@@ -124,43 +124,43 @@ resource "aws_security_group" "my-sg-1" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 }
-*/
-resource "aws_db_subnet_group" "my_db_subnet" {
-  name = "my-db-subnet-group"
 
-  subnet_ids = [
-    aws_subnet.mysubnet-1.id,
-    aws_subnet.mysubnet-2.id
-  ]
+# resource "aws_db_subnet_group" "my_db_subnet" {
+#   name = "my-db-subnet-group"
 
-  tags = {
-    Name = "db-subnet-group"
-  }
-}
+#   subnet_ids = [
+#     aws_subnet.mysubnet-1.id,
+#     aws_subnet.mysubnet-2.id
+#   ]
 
-resource "aws_db_instance" "my_db" {
+#   tags = {
+#     Name = "db-subnet-group"
+#   }
+# }
 
-  identifier = "mariadb-instance"
+# resource "aws_db_instance" "my_db" {
 
-  allocated_storage = 10
-  storage_type      = "gp2"
+#   identifier = "mariadb-instance"
 
-  engine         = "mariadb"
-  engine_version = "10.6"
+#   allocated_storage = 10
+#   storage_type      = "gp2"
 
-  instance_class = "db.t4g.micro"
+#   engine         = "mariadb"
+#   engine_version = "10.6"
 
-  db_name  = "studentapp"
-  username = "arya"
-  password = "Aryakadam47"
+#   instance_class = "db.t4g.micro"
 
-  db_subnet_group_name   = aws_db_subnet_group.my_db_subnet.name
-  vpc_security_group_ids = [aws_security_group.my-sg-1.id]
+#   db_name  = "studentapp"
+#   username = "arya"
+#   password = "Aryakadam47"
 
-  publicly_accessible = true
-  skip_final_snapshot = true
+#   db_subnet_group_name   = aws_db_subnet_group.my_db_subnet.name
+#   vpc_security_group_ids = [aws_security_group.my-sg-1.id]
 
-}
+#   publicly_accessible = true
+#   skip_final_snapshot = true
+
+# }
 /*
 resource "aws_instance" "Ec2Instance" {
     ami           = var.image_instance
@@ -200,7 +200,7 @@ resource "aws_instance" "db-instance" {
     ami           = var.image_instance
     instance_type = var.instance_type
     key_name = var.instance_key
-    vpc_security_group_ids = var.sg
+    vpc_security_group_ids = [aws_security_group.my-sg-1.id]
     subnet_id = aws_subnet.mysubnet-1.id
     user_data = base64encode(file("userdata.sh"))
     tags = {

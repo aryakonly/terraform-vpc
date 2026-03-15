@@ -56,29 +56,29 @@ variable "igw_name" {
   default = "my-igw"
 }
 
-# variable "nat_name" {
-#     description = "NAT Gateway name"
-#     type = string
-#     default = "my-ngw"
-# }
+variable "nat_name" {
+    description = "NAT Gateway name"
+    type = string
+    default = "my-ngw"
+}
 
-# variable "nat_route_table_name" {
-#     description = "NAT Gateway route table name"
-#     type = string
-#     default = "NAT-tb"
-# }
+variable "nat_route_table_name" {
+    description = "NAT Gateway route table name"
+    type = string
+    default = "NAT-tb"
+}
 
-# variable "security_group_name" {
-#  description = "Name of security group" 
-#  type = string
-#  default = "My-sg-1"
-# }
+variable "security_group_name" {
+ description = "Name of security group" 
+ type = string
+ default = "My-sg-1"
+}
 
-# variable "description_sg" {
-#     description = "Description of Security Group"
-#     type = string
-#     default = "Allow SSH , HTTP and HTTPS traffic"
-# }
+variable "description_sg" {
+    description = "Description of Security Group"
+    type = string
+    default = "Allow SSH , HTTP and HTTPS traffic"
+}
 
 variable "image_instance" {
     description = "AMI of ec2 instance"
@@ -91,20 +91,20 @@ variable "instance_type" {
   type = string
   default = "t3.micro"
 }
-variable "sg" {
-  default = ["sg-0002f6ecceaad3bdc"]
-}
+# variable "sg" {
+#   default = ["sg-0002f6ecceaad3bdc"]
+# }
 variable "instance_key" {
   description = "Key pair"
   type = string
   default = "mumbai-key"
 }
 
-# variable "public_instance_name" {
-#     description = "Public Instance name"
-#     type = string
-#     default = "jump-server"
-# }
+variable "public_instance_name" {
+    description = "Public Instance name"
+    type = string
+    default = "jump-server"
+}
 
 variable "private_instance_name" {
   description = "Private instance name"
