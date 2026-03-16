@@ -68,16 +68,21 @@ variable "nat_route_table_name" {
     default = "NAT-tb"
 }
 
-variable "security_group_name" {
+variable "security_group_name_1" {
  description = "Name of security group" 
  type = string
  default = "My-sg-1"
 }
 
-variable "description_sg" {
+variable "description_sg_1" {
     description = "Description of Security Group"
     type = string
     default = "Allow SSH , HTTP and HTTPS traffic"
+}
+variable "description_sg" {
+    description = "Description of Security Group"
+    type = string
+    default = "Allow MySQL only from EC2 security group"
 }
 
 variable "image_instance" {
@@ -91,9 +96,11 @@ variable "instance_type" {
   type = string
   default = "t3.micro"
 }
-# variable "sg" {
-#   default = ["sg-0002f6ecceaad3bdc"]
-# }
+
+variable "security_group_name" {
+  default = "my-sg-2"
+}
+
 variable "instance_key" {
   description = "Key pair"
   type = string

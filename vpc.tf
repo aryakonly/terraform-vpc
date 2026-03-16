@@ -86,8 +86,8 @@ resource "aws_route_table_association" "private-assoc" {
 }
 
 resource "aws_security_group" "my-sg-1" {
-  name        = var.security_group_name
-  description = var.description_sg
+  name        = var.security_group_name_1
+  description = var.description_sg_1
   vpc_id = aws_vpc.my-vpc.id
   ingress {
     from_port   = 22
@@ -113,6 +113,27 @@ resource "aws_security_group" "my-sg-1" {
     protocol = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+}
+
+resource "aws_security_group" "my-sg-2" {
+  name        = var.security_group_name
+  description = var.description_sg
+  vpc_id      = aws_vpc.my-vpc.id
+
+
+  ingress {
+    from_port       = 3306
+    to_port         = 3306
+    protocol        = "tcp"
+    security_groups = [aws_security_group.ec2_sg.id]
+  }
+
   egress {
     from_port   = 0
     to_port     = 0
@@ -147,7 +168,7 @@ resource "aws_db_instance" "my_db" {
   password = var.db_password
 
   db_subnet_group_name   = aws_db_subnet_group.my_db_subnet.name
-  vpc_security_group_ids = [aws_security_group.my-sg-1.id]
+  vpc_security_group_ids = [aws_security_group.my-sg-2.id]
 
   publicly_accessible = false
   skip_final_snapshot = true
@@ -161,40 +182,50 @@ resource "aws_instance" "Ec2Instance" {
     vpc_security_group_ids = [aws_security_group.my-sg-1.id]
     subnet_id = aws_subnet.mysubnet-1.id
     user_data = <<-EOF
-    #!/bin/bash
-    yum install java-17-amazon-corretto python3 mariadb105 -y
-    curl -O https://dlcdn.apache.org/tomcat/tomcat-9/v9.0.115/bin/apache-tomcat-9.0.115.tar.gz
-    tar -xzvf apache-tomcat-9.0.115.tar.gz -C /opt
-    /opt/apache-tomcat-9.0.115/bin/./catalina.sh start
-    cd /opt/apache-tomcat-9.0.115/webapps/
-    curl -O https://s3-us-west-2.amazonaws.com/studentapi-cit/student.war
-    cd /opt/apache-tomcat-9.0.115/lib/
-    curl -O https://s3-us-west-2.amazonaws.com/studentapi-cit/mysql-connector.jar
-    echo "Waiting for database to accept connections..."
-    until mysqladmin ping -h ${aws_db_instance.my_db.address} -u arya -p${var.db_password} --silent 2>/dev/null; do
-    echo "DB not ready yet, retrying in 10s..."
-    sleep 10
-    done
-    
-    python3 - <<PYTHON
-    f = open('/opt/apache-tomcat-9.0.115/conf/context.xml', 'r')
-    lines = f.readlines()
-    f.close()
+#!/bin/bash
 
-    resource = '    <Resource name="jdbc/TestDB" auth="Container" type="javax.sql.DataSource" maxTotal="500" maxIdle="30" maxWaitMillis="1000" username="admin" password="${var.db_password}" driverClassName="com.mysql.jdbc.Driver" url="jdbc:mysql://${aws_db_instance.my_db.address}:3306/studentapp?useUnicode=yes&amp;characterEncoding=utf8"/>\n'
 
-    for i, line in enumerate(lines):
-        if '</Context>' in line:
-            lines.insert(i, resource)
-            break
+yum install java-17-amazon-corretto python3 mariadb105 -y
 
-    f = open('/opt/apache-tomcat-9.0.115/conf/context.xml', 'w')
-    f.writelines(lines)
-    f.close()
-    PYTHON
-    
-    /opt/apache-tomcat-9.0.115/bin/./catalina.sh stop
-    /opt/apache-tomcat-9.0.115/bin/./catalina.sh start
+cd /opt
+curl -O https://dlcdn.apache.org/tomcat/tomcat-9/v9.0.115/bin/apache-tomcat-9.0.115.tar.gz
+tar -xzf apache-tomcat-9.0.115.tar.gz
+
+/opt/apache-tomcat-9.0.115/bin/catalina.sh start
+
+cd /opt/apache-tomcat-9.0.115/webapps/
+curl -O https://s3-us-west-2.amazonaws.com/studentapi-cit/student.war
+
+cd /opt/apache-tomcat-9.0.115/lib/
+curl -O https://s3-us-west-2.amazonaws.com/studentapi-cit/mysql-connector.jar
+
+echo "Waiting for database to accept connections..."
+until mysqladmin ping -h ${aws_db_instance.my_db.address} -u arya -p${var.db_password} --silent 2>/dev/null; do
+  echo "DB not ready yet, retrying in 10s..."
+  sleep 10
+done
+echo "Database is up."
+
+python3 - <<PYTHON
+f = open('/opt/apache-tomcat-9.0.115/conf/context.xml', 'r')
+lines = f.readlines()
+f.close()
+
+resource = '    <Resource name="jdbc/TestDB" auth="Container" type="javax.sql.DataSource" maxTotal="500" maxIdle="30" maxWaitMillis="1000" username="arya" password="${var.db_password}" driverClassName="com.mysql.jdbc.Driver" url="jdbc:mysql://${aws_db_instance.my_db.address}:3306/studentapp?useUnicode=yes&amp;characterEncoding=utf8"/>\n'
+
+for i, line in enumerate(lines):
+    if '</Context>' in line:
+        lines.insert(i, resource)
+        break
+
+f = open('/opt/apache-tomcat-9.0.115/conf/context.xml', 'w')
+f.writelines(lines)
+f.close()
+PYTHON
+
+/opt/apache-tomcat-9.0.115/bin/catalina.sh stop
+/opt/apache-tomcat-9.0.115/bin/catalina.sh start
+
 EOF
     tags = {
       Name = var.public_instance_name
