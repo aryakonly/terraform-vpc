@@ -131,7 +131,7 @@ resource "aws_security_group" "my-sg-2" {
     from_port       = 3306
     to_port         = 3306
     protocol        = "tcp"
-    security_groups = [aws_security_group.ec2_sg.id]
+    security_groups = [aws_security_group.my-sg-1.id]
   }
 
   egress {
@@ -269,4 +269,9 @@ MYSQL
 
 output "public-ip" {
   value = aws_instance.Ec2Instance.public_ip
+}
+
+output "app_url" {
+  description = "Tomcat app URL"
+  value       = "http://${aws_instance.ec2_public.public_ip}:8080/student"
 }
