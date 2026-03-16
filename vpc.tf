@@ -162,7 +162,7 @@ resource "aws_instance" "Ec2Instance" {
     subnet_id = aws_subnet.mysubnet-1.id
     user_data = <<-EOF
     #!/bin/bash
-    yum install java -y
+    yum install java-17-amazon-corretto python3 mariadb105 -y
     curl -O https://dlcdn.apache.org/tomcat/tomcat-9/v9.0.115/bin/apache-tomcat-9.0.115.tar.gz
     tar -xzvf apache-tomcat-9.0.115.tar.gz -C /opt
     /opt/apache-tomcat-9.0.115/bin/./catalina.sh start
@@ -171,7 +171,7 @@ resource "aws_instance" "Ec2Instance" {
     cd /opt/apache-tomcat-9.0.115/lib/
     curl -O https://s3-us-west-2.amazonaws.com/studentapi-cit/mysql-connector.jar
     echo "Waiting for database to accept connections..."
-    until mysqladmin ping -h ${aws_db_instance.my_db.address} -u admin -p${var.db_password} --silent 2>/dev/null; do
+    until mysqladmin ping -h ${aws_db_instance.my_db.address} -u arya -p${var.db_password} --silent 2>/dev/null; do
     echo "DB not ready yet, retrying in 10s..."
     sleep 10
     done
