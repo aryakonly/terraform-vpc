@@ -273,5 +273,5 @@ output "public-ip" {
 
 output "app_url" {
   description = "Tomcat app URL"
-  value       = "http://${aws_instance.ec2_public.public_ip}:8080/student"
+  value       = "http://${aws_instance.Ec2Instance.public_ip}:8080/student"
 }
